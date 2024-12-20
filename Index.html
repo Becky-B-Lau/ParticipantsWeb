@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Participants</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="app" class="container mt-5">
+        <h1 class="mb-4">Participants</h1>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>Country</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="participant in participants" :key="participant.id">
+                    <td>{{ participant.id }}</td>
+                    <td>{{ participant.name }}</td>
+                    <td>{{ participant.age }}</td>
+                    <td>{{ participant.country }}</td>
+                    <td><button class="btn btn-danger" @click="deleteParticipant(participant.id)">Delete</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <form @submit.prevent="addParticipant" class="mt-4">
+            <div class="mb-3">
+                <label for="name" class="form-label">Name:</label>
+                <input type="text" id="name" v-model="newParticipant.name" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="age" class="form-label">Age:</label>
+                <input type="number" id="age" v-model="newParticipant.age" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="country" class="form-label">Country:</label>
+                <input type="text" id="country" v-model="newParticipant.country" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Participant</button>
+        </form>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                participants: [],
+                newParticipant: {
+                    name: '',
+                    age: '',
+                    country: ''
+                }
+            },
+            created() {
+                this.fetchParticipants();
+            },
+            methods: {
+                fetchParticipants() {
+                    axios.get('http://localhost:5179/Participant')
+                        .then(response => {
+                            this.participants = response.data;
+                        });
+                },
+                addParticipant() {
+                    axios.post('http://localhost:5179/Participant', this.newParticipant)
+                        .then(() => {
+                            this.fetchParticipants();
+                            this.newParticipant.name = '';
+                            this.newParticipant.age = '';
+                            this.newParticipant.country = '';
+                        });
+                },
+                deleteParticipant(id) {
+                    axios.delete(`http://localhost:5179/Participant/${id}`)
+                        .then(() => {
+                            this.fetchParticipants();
+                        });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
