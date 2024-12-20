@@ -8,7 +8,24 @@
 </head>
 <body>
     <div id="app" class="container mt-5">
-        <h1 class="mb-4">Participants</h1>
+        <h1 class="mb-4 text-center">Participants</h1>
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <input type="text" v-model="searchQuery" class="form-control" placeholder="Search by name">
+            </div>
+            <div class="col-md-4">
+                <select v-model="sortKey" class="form-select">
+                    <option value="name">Name</option>
+                    <option value="age">Age</option>
+                    <option value="country">Country</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <button @click="sortOrder = !sortOrder" class="btn btn-secondary">
+                    Sort {{ sortOrder ? 'Descending' : 'Ascending' }}
+                </button>
+            </div>
+        </div>
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -20,7 +37,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="participant in participants" :key="participant.id">
+                <tr v-for="participant in filteredParticipants" :key="participant.id">
                     <td>{{ participant.id }}</td>
                     <td>{{ participant.name }}</td>
                     <td>{{ participant.age }}</td>
@@ -56,10 +73,27 @@
                     name: '',
                     age: '',
                     country: ''
-                }
+                },
+                searchQuery: '',
+                sortKey: 'name',
+                sortOrder: true
             },
             created() {
                 this.fetchParticipants();
+            },
+            computed: {
+                filteredParticipants() {
+                    let filtered = this.participants.filter(participant => {
+                        return participant.name.toLowerCase().includes(this.searchQuery.toLowerCase());
+                    });
+
+                    return filtered.sort((a, b) => {
+                        let modifier = this.sortOrder ? 1 : -1;
+                        if (a[this.sortKey] < b[this.sortKey]) return -1 * modifier;
+                        if (a[this.sortKey] > b[this.sortKey]) return 1 * modifier;
+                        return 0;
+                    });
+                }
             },
             methods: {
                 fetchParticipants() {
